@@ -7,6 +7,8 @@
  */
 
 /* == HELPERS == */
+import p5 from "p5";
+
 const randomFrom = (array) => array[Math.floor(Math.random() * array.length)];
 
 const componentToHex = (c) => {
@@ -23,10 +25,18 @@ export class Tile {
   static fullEdgeDetection = false;
 
   // Must be set in sketch with access to p5
-  static rotateImg(_img, _amount) {
-    console.error(
-      "Tile.rotateImg is not defined by default. Set this in your sketch for proper functionality."
-    );
+  static rotateImg(img, amount) {
+    const w = img.width;
+    const h = img.height;
+
+    const newImg = p5.createGraphics(w, h);
+
+    newImg.imageMode(p5.CENTER);
+    newImg.translate(w / 2, h / 2);
+    newImg.rotate(p5.HALF_PI * amount);
+    newImg.image(img, 0, 0);
+
+    return new Tile(newImg);
   }
 
   constructor(img) {

@@ -1,21 +1,9 @@
-import React from "react";
-import { ReactP5Wrapper } from "react-p5-wrapper";
-import p5 from "p5";
 import { Tile, Cell, Grid } from "../libraries/waveFunctionCollapse";
+import { ReactP5Wrapper } from "react-p5-wrapper";
+import React from "react";
+import p5 from "p5";
 
-function importAll(r) {
-  let images = {};
-  r.keys().forEach((item, index) => {
-    images[item.replace("./", "")] = r(item);
-  });
-  return images;
-}
-
-const tileset = "circuit";
-
-const width = 500;
-const height = 500;
-
+/* == CONFIG DICTIONARIES == */
 const tilesetLengths = {
   "circuit-joe": 19,
   circuit: 13,
@@ -40,17 +28,32 @@ const tilesetModes = {
   "circuit-coding-train": "simple",
   "circuit-custom": "complex",
 };
-const mode = tilesetModes[tileset];
 
-/* == VARIABLES == */
+/* == SKETCH VARIABLES == */
+const tileset = "circuit";
+const mode = tilesetModes[tileset];
 const GRID_SCALE = 1 / 40; // 1/3 is in deployment
-const SHOW_DRAW = true;
 const LOOP_DELAY = 10 * 1000; // ms
+const width = 500;
+const height = 500;
 
 let images;
 let waveFunction;
 
 /* == HELPER FUNCTION == */
+/**
+ * Hoped this might work from StackOverflow.
+ * Seems to require multiple images corrcetly,
+ * but it's not fixing my p5.loadImage problem
+ * */
+function importAll(r) {
+  let images = {};
+  r.keys().forEach((item, index) => {
+    images[item.replace("./", "")] = r(item);
+  });
+  return images;
+}
+
 function drawCell(cell) {
   const w = width / waveFunction.width;
   const h = height / waveFunction.height;
@@ -76,29 +79,17 @@ const loadAllImages = (folder, number) => {
   return imgs;
 };
 
-function rotateImg(img, amount) {
-  const w = img.width;
-  const h = img.height;
-
-  const newImg = p5.createGraphics(w, h);
-
-  newImg.imageMode(p5.CENTER);
-  newImg.translate(w / 2, h / 2);
-  newImg.rotate(p5.HALF_PI * amount);
-  newImg.image(img, 0, 0);
-
-  return new Tile(newImg);
-}
-
-/* == MAIN FUNCTIONS == */
-
 function preload() {
-  const length = tilesetLengths[tileset];
-  images = loadAllImages(tileset, length);
-  // images = importAll(
-  //   require.context("../tiles/circuit", false, /\.(png|jpe?g|svg)$/)
-  // );
-  // images = Object.values(images).map((i) => p5.loadImage(i));
+  // const length = tilesetLengths[tileset];
+  // images = loadAllImages(tileset, length);
+  images = importAll(
+    require.context("../tiles/circuit", false, /\.(png|jpe?g|svg)$/)
+  );
+  images = Object.values(images).map((i) => p5.prototype.loadImage(i));
+
+  Tile.fullEdgeDetection = mode === "complex";
+  Cell.resetCallback = (cell) => drawCell(cell);
+  Cell.setOptions(images);
 }
 
 function reset() {
@@ -107,27 +98,23 @@ function reset() {
   p5.loop();
 }
 
-function setup() {
-  preload();
+/* == MAIN FUNCTIONS == */
+function sketch(p5) {
+  p5.setup = () => {
+    preload();
 
-  Tile.rotateImg = rotateImg;
-  Tile.fullEdgeDetection = mode === "complex";
-  Cell.resetCallback = (cell) => drawCell(cell);
-  Cell.setOptions(images);
+    p5.createCanvas(width, height);
+    p5.fill("black");
+    p5.background("black");
+    p5.noStroke();
 
-  p5.createCanvas(width, height);
-  p5.fill("black");
-  p5.background("black");
-  p5.noStroke();
+    waveFunction = new Grid(
+      p5.floor(width * GRID_SCALE),
+      p5.floor(height * GRID_SCALE)
+    );
+  };
 
-  waveFunction = new Grid(
-    p5.floor(width * GRID_SCALE),
-    p5.floor(height * GRID_SCALE)
-  );
-}
-
-function draw() {
-  if (SHOW_DRAW) {
+  p5.draw = () => {
     if (!waveFunction.collapsed) {
       const newCell = waveFunction.observe();
       drawCell(newCell);
@@ -135,16 +122,7 @@ function draw() {
       setTimeout(reset, LOOP_DELAY);
       p5.noLoop();
     }
-  } else {
-    waveFunction.collapse();
-    waveFunction.cells.forEach((cell) => drawCell(cell));
-    p5.noLoop();
-  }
-}
-
-function sketch(p5) {
-  p5.setup = setup;
-  p5.draw = draw;
+  };
 }
 
 const Wave = () => {
