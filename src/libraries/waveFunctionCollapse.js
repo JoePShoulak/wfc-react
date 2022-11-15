@@ -11,7 +11,7 @@ const randomFrom = (array) => array[Math.floor(Math.random() * array.length)];
 
 const componentToHex = (c) => {
   var hex = c.toString(16);
-  return hex.length == 1 ? "0" + hex : hex;
+  return hex.length === 1 ? "0" + hex : hex;
 };
 
 const rgbToHex = (r, g, b, _a) => {
@@ -19,7 +19,7 @@ const rgbToHex = (r, g, b, _a) => {
 };
 
 /* == TILE CLASS == */
-class Tile {
+export class Tile {
   static fullEdgeDetection = false;
 
   // Must be set in sketch with access to p5
@@ -70,6 +70,8 @@ class Tile {
           edge.push(rgbToHex(...this.img.get(0, y)));
         }
         break;
+      default:
+        break;
     }
 
     return edge;
@@ -103,6 +105,8 @@ class Tile {
       case "left":
         edge = [SW, WW, NW];
         break;
+      default:
+        break;
     }
 
     edge = edge.map((point) => rgbToHex(...this.img.get(...point)));
@@ -115,16 +119,16 @@ class Tile {
 
     // All edges are the same
     const fullySymmetric =
-      this.edges.left.every((pix, i) => pix == this.edges.up[i]) &&
-      this.edges.left.every((pix, i) => pix == this.edges.right[i]) &&
-      this.edges.left.every((pix, i) => pix == this.edges.down[i]);
+      this.edges.left.every((pix, i) => pix === this.edges.up[i]) &&
+      this.edges.left.every((pix, i) => pix === this.edges.right[i]) &&
+      this.edges.left.every((pix, i) => pix === this.edges.down[i]);
 
     if (fullySymmetric) return [this];
 
     // Opposite edges are the same
     const halfSymmetric =
-      this.edges.left.every((pix, i) => pix == this.edges.right[i]) &&
-      this.edges.up.every((pix, i) => pix == this.edges.down[i]);
+      this.edges.left.every((pix, i) => pix === this.edges.right[i]) &&
+      this.edges.up.every((pix, i) => pix === this.edges.down[i]);
 
     const amount = halfSymmetric ? 2 : 4;
 
@@ -137,13 +141,13 @@ class Tile {
 }
 
 /* == CELL CLASS == */
-class Cell {
+export class Cell {
   static options = [];
 
   static resetCallback() {}
 
   static compareEdge(myEdge, relEdge) {
-    const res = myEdge.every((bit, i) => bit == [...relEdge].reverse()[i]);
+    const res = myEdge.every((bit, i) => bit === [...relEdge].reverse()[i]);
     return res;
   }
 
@@ -219,7 +223,7 @@ class Cell {
       return true;
     });
 
-    if (this.options.length == 0) {
+    if (this.options.length === 0) {
       this.reset();
 
       Object.values(this.neighbors).forEach((cell) => cell.reset());
@@ -228,7 +232,7 @@ class Cell {
 }
 
 /* == GRID CLASS == */
-class Grid {
+export class Grid {
   static directions = ["up", "down", "left", "right"];
 
   constructor(width, height) {
@@ -252,7 +256,7 @@ class Grid {
   }
 
   get collapsed() {
-    return this.uncollapsed.length == 0;
+    return this.uncollapsed.length === 0;
   }
 
   get next() {
@@ -263,7 +267,7 @@ class Grid {
     }, Cell.options.length);
 
     const allMin = this.uncollapsed.filter(
-      (cell) => cell.options.length == minEntropy
+      (cell) => cell.options.length === minEntropy
     );
 
     return randomFrom(allMin);
@@ -305,10 +309,12 @@ class Grid {
 
     switch (dir) {
       case "right":
-        flagBool = index % this.width != 0;
+        flagBool = index % this.width !== 0;
         break;
       case "left":
-        flagBool = (index + 1) % this.width != 0;
+        flagBool = (index + 1) % this.width !== 0;
+        break;
+      default:
         break;
     }
 

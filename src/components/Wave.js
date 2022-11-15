@@ -1,7 +1,7 @@
 import React from "react";
 import { ReactP5Wrapper } from "react-p5-wrapper";
 import p5 from "p5";
-import { Tile, Cell, Grid } from "../libraries/waveFunctionCollapseLib";
+import { Tile, Cell, Grid } from "../libraries/waveFunctionCollapse";
 
 const tileset = "circuit";
 
@@ -99,7 +99,7 @@ function setup() {
   preload();
 
   Tile.rotateImg = rotateImg;
-  Tile.fullEdgeDetection = mode == "complex";
+  Tile.fullEdgeDetection = mode === "complex";
   Cell.resetCallback = (cell) => drawCell(cell);
   Cell.setOptions(images);
 
