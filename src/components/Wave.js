@@ -3,6 +3,14 @@ import { ReactP5Wrapper } from "react-p5-wrapper";
 import p5 from "p5";
 import { Tile, Cell, Grid } from "../libraries/waveFunctionCollapse";
 
+function importAll(r) {
+  let images = {};
+  r.keys().forEach((item, index) => {
+    images[item.replace("./", "")] = r(item);
+  });
+  return images;
+}
+
 const tileset = "circuit";
 
 const width = 500;
@@ -87,6 +95,10 @@ function rotateImg(img, amount) {
 function preload() {
   const length = tilesetLengths[tileset];
   images = loadAllImages(tileset, length);
+  // images = importAll(
+  //   require.context("../tiles/circuit", false, /\.(png|jpe?g|svg)$/)
+  // );
+  // images = Object.values(images).map((i) => p5.loadImage(i));
 }
 
 function reset() {
